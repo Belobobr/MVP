@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+  <com.mixailsednev.githubrepo.mvptabletphone.filter.TabletFilterView
+      android:id="@+id/tabletFilterView"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/top_panel_size">
+
+  </com.mixailsednev.githubrepo.mvptabletphone.filter.TabletFilterView>
+
+  <fragment
+      android:id="@+id/casesView"
+      android:name="com.mixailsednev.githubrepo.mvptabletphone.cases.CasesFragment"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"/>
+
+</LinearLayout>
