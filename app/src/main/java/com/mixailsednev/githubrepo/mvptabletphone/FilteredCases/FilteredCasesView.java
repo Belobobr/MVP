@@ -12,4 +12,5 @@ public interface FilteredCasesView {
     void setCases(@NonNull List<Case> cases);
     void setLoading(boolean loading);
     void setFilter(@Nullable Filter filter);
+    void selectFilter();
 }

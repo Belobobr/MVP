@@ -1,11 +1,13 @@
 package com.mixailsednev.githubrepo.mvptabletphone.model.filteredCases;
 
+import android.support.annotation.NonNull;
+
 import com.mixailsednev.githubrepo.mvptabletphone.model.BaseStore;
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.Case;
 
 import java.util.ArrayList;
+import java.util.List;
 
-//TODO move to di
 public class FilteredCasesStore extends BaseStore<FilteredCasesState> {
 
     private static FilteredCasesStore instance = new FilteredCasesStore();
@@ -17,4 +19,15 @@ public class FilteredCasesStore extends BaseStore<FilteredCasesState> {
     public FilteredCasesStore() {
         super(new FilteredCasesState(new ArrayList<Case>(), false));
     }
+
+    public void setFilteredCases(@NonNull List<Case> cases) {
+        getState().setFilteredCases(cases);
+        notifyDataChanged();
+    }
+
+    public void setLoading(boolean loading) {
+        getState().setLoading(loading);
+        notifyDataChanged();
+    }
+
 }

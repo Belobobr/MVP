@@ -1,5 +1,7 @@
 package com.mixailsednev.githubrepo.mvptabletphone.model.filter;
 
+import android.support.annotation.Nullable;
+
 import com.mixailsednev.githubrepo.mvptabletphone.model.BaseStore;
 
 public class FilterStore extends BaseStore<FilterState> {
@@ -11,5 +13,10 @@ public class FilterStore extends BaseStore<FilterState> {
 
     public FilterStore() {
         super(new FilterState());
+    }
+
+    public void updateFilter(@Nullable Filter filter) {
+        getState().setFilter(filter);
+        notifyDataChanged();
     }
 }

@@ -19,7 +19,7 @@ public class BaseStore<Data>  {
 
     public void setState(Data state) {
         mState = state;
-        notifyDataChanged(state);
+        notifyDataChanged();
     }
 
     public DataChangeListener addListener(DataChangeListener<Data> dataChangeListener) {
@@ -32,9 +32,9 @@ public class BaseStore<Data>  {
         mDataChangeListeners.remove(dataDataChangeListener);
     }
 
-    public void notifyDataChanged(Data data) {
+    public void notifyDataChanged() {
         for (DataChangeListener listener : mDataChangeListeners) {
-            listener.newDataReceived(data);
+            listener.newDataReceived(mState);
         }
     }
 }

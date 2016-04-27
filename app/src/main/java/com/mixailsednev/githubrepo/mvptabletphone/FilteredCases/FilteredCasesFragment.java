@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mixailsednev.githubrepo.mvptabletphone.Injection;
 import com.mixailsednev.githubrepo.mvptabletphone.common.BaseFragment;
 import com.mixailsednev.githubrepo.mvptabletphone.cases.CasesView;
 import com.mixailsednev.githubrepo.mvptabletphone.filter.PhoneFilterView;
@@ -38,8 +39,8 @@ public class FilteredCasesFragment extends BaseFragment<FilteredCasesPresenter> 
     }
 
     @Override
-    public FilteredCasesPresenter getPresenter() {
-        return  new FilteredCasesPresenter(this);
+    public FilteredCasesPresenter createPresenter() {
+        return  new FilteredCasesPresenter(this, Injection.provideFilteredCasesStore(), Injection.provideFilterStore(), Injection.provideActionCreator().createLoadFilteredCasesAction());
     }
 
     @Override
@@ -79,12 +80,16 @@ public class FilteredCasesFragment extends BaseFragment<FilteredCasesPresenter> 
         int id = item.getItemId();
 
         if (id == R.id.filter) {
-            Intent filterIntent = new Intent(getContext(), FilterActivity.class);
-            startActivityForResult(filterIntent, FILTER_REQUEST);
+            presenter.selectFilter();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void selectFilter() {
+        Intent filterIntent = new Intent(getContext(), FilterActivity.class);
+        startActivityForResult(filterIntent, FILTER_REQUEST);
     }
 
     @Override
@@ -103,12 +108,13 @@ public class FilteredCasesFragment extends BaseFragment<FilteredCasesPresenter> 
 
     @Override
     public void onNewViewStateInstance() {
-        presenter.filterSelected(null);
+        presenter.loadCases(null);
     }
 
     @Override
     public void onFilterSelected(@Nullable  Filter filter) {
-        presenter.filterSelected(filter);
+        presenter.saveFilter(filter);
+        presenter.loadCases(filter);
 
     }
 

@@ -1,29 +1,28 @@
 package com.mixailsednev.githubrepo.mvptabletphone.model.filteredCases;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.Case;
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.CaseTypes;
 import com.mixailsednev.githubrepo.mvptabletphone.model.filter.Filter;
-import com.mixailsednev.githubrepo.mvptabletphone.model.filter.FilterState;
-import com.mixailsednev.githubrepo.mvptabletphone.model.filter.FilterStore;
 import com.mixailsednev.githubrepo.mvptabletphone.utils.MsCollectionsUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class FilteredCasesActions {
+public class CasesServiceApiImp implements  CasesServiceApi {
 
-    public static void filterSelected(@Nullable Filter filter) {
-        FilteredCasesState filteredCasesState = FilteredCasesStore.getInstance().getState();
-        filteredCasesState.setLoading(true);
-        FilteredCasesStore.getInstance().setState(filteredCasesState);
+    private static CasesServiceApiImp instance = new CasesServiceApiImp();
 
-        FilterState filterState = FilterStore.getInstance().getState();
-        filterState.setFilter(filter);
+    public static CasesServiceApiImp getInstance() {
+        return instance;
+    }
 
+    @Override
+    public void loadCases(final @Nullable Filter filter, final @NonNull CasesLoadedCallback casesLoadedCallback) {
         new AsyncTask<Filter, Integer, List<Case>>() {
             @Override
             protected List<Case> doInBackground(Filter... params) {
@@ -44,11 +43,8 @@ public class FilteredCasesActions {
             }
 
             @Override
-            protected void onPostExecute(List<Case> cases) {
-                FilteredCasesState filteredCasesState = FilteredCasesStore.getInstance().getState();
-                filteredCasesState.setFilteredCases(cases);
-                filteredCasesState.setLoading(false);
-                FilteredCasesStore.getInstance().setState(filteredCasesState);
+            protected void onPostExecute(@NonNull List<Case> cases) {
+                casesLoadedCallback.onCasesLoaded(cases);
             }
         }.execute(filter);
     }

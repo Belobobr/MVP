@@ -13,15 +13,15 @@ public abstract class BaseFragment<Presenter extends BasePresenter> extends Frag
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        presenter = getPresenter();
+        presenter = createPresenter();
     }
 
-    public abstract Presenter getPresenter();
+    public abstract Presenter createPresenter();
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        getPresenter().subscribeToDataStore();
+        createPresenter().subscribeToDataStore();
 
         if (savedInstanceState == null || savedInstanceState != null && !savedInstanceState.getBoolean(ARG_RESTORED)) {
             onNewViewStateInstance();
@@ -31,7 +31,7 @@ public abstract class BaseFragment<Presenter extends BasePresenter> extends Frag
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        getPresenter().unSubscribeFromDataStore();
+        createPresenter().unSubscribeFromDataStore();
 
         outState.putBoolean(ARG_RESTORED, true);
     }
