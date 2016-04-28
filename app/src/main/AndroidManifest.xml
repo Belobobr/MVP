@@ -23,6 +23,13 @@
         android:label="@string/title_activity_filter"
         android:theme="@style/AppTheme.NoActionBar">
     </activity>
+
+    <provider
+        android:name=".model.CaseBookContentProvider"
+        android:authorities="com.mixailsednev.githubrepo.mvptabletphone.CaseBook"
+        android:enabled="true"
+        android:exported="false">
+    </provider>
   </application>
 
 </manifest>

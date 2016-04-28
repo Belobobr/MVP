@@ -3,6 +3,7 @@ package com.mixailsednev.githubrepo.mvptabletphone.filter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
@@ -43,9 +44,18 @@ public class PhoneFilterView extends LinearLayout {
 
     public void setFilter(@Nullable Filter filter) {
         if (filter != null) {
-            dateTextView.setText(new Date(filter.getDate()).toString());
-            caseTypeTextView.setText(filter.getCaseType());
-            assignedTextView.setText(filter.getAssigned());
+            dateTextView.setText(
+                    filter.getDate() != null ?
+                            new Date(filter.getDate()).toString()
+                            : getResources().getString(R.string.not_selected));
+            caseTypeTextView.setText(
+                    TextUtils.isEmpty(filter.getCaseType()) ?
+                            getResources().getString(R.string.case_type_not_selected)
+                            :filter.getCaseType());
+            assignedTextView.setText(
+                    TextUtils.isEmpty(filter.getAssigned()) ?
+                            getResources().getString(R.string.not_assigned)
+                            :filter.getAssigned());
         }
     }
 }

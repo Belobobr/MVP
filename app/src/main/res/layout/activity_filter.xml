@@ -24,7 +24,17 @@
 
     <com.mixailsednev.githubrepo.mvptabletphone.filter.PhoneFilterView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
     </com.mixailsednev.githubrepo.mvptabletphone.filter.PhoneFilterView>
+
+    <Spinner
+        android:id="@+id/caseTypeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/assignedEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

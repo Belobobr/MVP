@@ -9,4 +9,7 @@
   <string name="date">Дата</string>
   <string name="case_type">Тип дела</string>
   <string name="assigned">Назначена</string>
+  <string name="not_selected">Не выбрана</string>
+  <string name="case_type_not_selected">Не выбран</string>
+  <string name="not_assigned">Не назначена</string>
 </resources>

@@ -52,7 +52,7 @@ public class FilteredCasesPresenter extends BasePresenter<FilteredCasesView>
     }
 
     public void selectFilter() {
-        getView().selectFilter();
+        getView().selectFilter(filterStore.getState().getFilter());
     }
 
     public void saveFilter(@Nullable Filter filter) {

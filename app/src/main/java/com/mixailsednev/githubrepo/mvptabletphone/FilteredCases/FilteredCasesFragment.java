@@ -87,8 +87,9 @@ public class FilteredCasesFragment extends BaseFragment<FilteredCasesPresenter> 
         return super.onOptionsItemSelected(item);
     }
 
-    public void selectFilter() {
+    public void selectFilter(@Nullable Filter currentFilter) {
         Intent filterIntent = new Intent(getContext(), FilterActivity.class);
+        filterIntent.putExtra(FilterActivity.ARG_FILTER, currentFilter);
         startActivityForResult(filterIntent, FILTER_REQUEST);
     }
 

@@ -4,6 +4,7 @@ import com.mixailsednev.githubrepo.mvptabletphone.FilteredCases.FilteredCasesPre
 import com.mixailsednev.githubrepo.mvptabletphone.FilteredCases.FilteredCasesView;
 import com.mixailsednev.githubrepo.mvptabletphone.model.DataChangeListener;
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.Case;
+import com.mixailsednev.githubrepo.mvptabletphone.model.cases.CaseBuilder;
 import com.mixailsednev.githubrepo.mvptabletphone.model.filter.Filter;
 import com.mixailsednev.githubrepo.mvptabletphone.model.filter.FilterBuilder;
 import com.mixailsednev.githubrepo.mvptabletphone.model.filter.FilterState;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.verify;
 
 public class FilteredCasesPresenterTest {
 
-    private static List<Case> filteredCases = new ArrayList<Case>(Arrays.asList(new Case("Пам пам"), new Case("Пам пам")));
+    private static List<Case> filteredCases = new ArrayList<Case>(Arrays.asList(new CaseBuilder().setTitle("Пам пам").createCase(), new CaseBuilder().setTitle("Пам пам").createCase()));
     private static FilteredCasesState FILTERED_CASES_STATE =  new FilteredCasesState(filteredCases, true);
     private static FilterState FILTER_CASES_STATE = new FilterState();
     private static Filter SAVED_FILTER = new FilterBuilder().createFilter();
@@ -90,7 +91,7 @@ public class FilteredCasesPresenterTest {
     public void selectFilter() {
         filteredCasesPresenter.selectFilter();
 
-        verify(filteredCasesView).selectFilter();
+        verify(filteredCasesView).selectFilter(null);
     }
 
     @Test
