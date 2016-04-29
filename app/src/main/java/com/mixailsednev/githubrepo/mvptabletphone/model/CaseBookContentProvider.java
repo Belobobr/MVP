@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
@@ -20,39 +21,6 @@ public class CaseBookContentProvider extends ContentProvider {
     static final String DB_NAME = "caseBookDb";
     static final int DB_VERSION = 1;
 
-    // Таблица
-    static final String CASES_TABLE = "cases";
-
-    // Поля
-    static final String CASE_ID = "_id";
-    static final String CASE_TITLE = "title";
-    static final String CASE_TYPE = "type";
-
-    // Скрипт создания таблицы
-    static final String DB_CREATE = "create table " + CASES_TABLE + "("
-            + CASE_ID + " integer primary key autoincrement, "
-            + CASE_TITLE + " text, " + CASE_TYPE + " text" + ");";
-
-    // // Uri
-    // authority
-    static final String AUTHORITY = "com.mixailsednev.githubrepo.mvptabletphone.CaseBook";
-
-    // path
-    static final String CASE_PATH = "case";
-
-    // Общий Uri
-    public static final Uri CASE_CONTENT_URI = Uri.parse("content://"
-            + AUTHORITY + "/" + CASE_PATH);
-
-    // Типы данных
-    // набор строк
-    static final String CASE_CONTENT_TYPE = "vnd.android.cursor.dir/vnd."
-            + AUTHORITY + "." + CASE_PATH;
-
-    // одна строка
-    static final String CASE_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd."
-            + AUTHORITY + "." + CASE_PATH;
-
     //// UriMatcher
     // общий Uri
     static final int URI_CASE = 1;
@@ -64,8 +32,8 @@ public class CaseBookContentProvider extends ContentProvider {
     private static final UriMatcher uriMatcher;
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(AUTHORITY, CASE_PATH, URI_CASE);
-        uriMatcher.addURI(AUTHORITY, CASE_PATH + "/#", URI_CASE_ID);
+        uriMatcher.addURI(CaseBookContentProviderContract.AUTHORITY, CaseBookContentProviderContract.CASE_PATH, URI_CASE);
+        uriMatcher.addURI(CaseBookContentProviderContract.AUTHORITY, CaseBookContentProviderContract.CASE_PATH + "/#", URI_CASE_ID);
     }
 
     DBHelper dbHelper;
@@ -87,7 +55,7 @@ public class CaseBookContentProvider extends ContentProvider {
                 Log.d(TAG, "URI_CASE");
                 // если сортировка не указана, ставим свою - по имени
                 if (TextUtils.isEmpty(sortOrder)) {
-                    sortOrder = CASE_TITLE + " ASC";
+                    sortOrder = CaseBookContentProviderContract.CASE_TITLE + " ASC";
                 }
                 break;
             case URI_CASE_ID: // Uri с ID
@@ -95,21 +63,21 @@ public class CaseBookContentProvider extends ContentProvider {
                 Log.d(TAG, "URI_CASE_ID, " + id);
                 // добавляем ID к условию выборки
                 if (TextUtils.isEmpty(selection)) {
-                    selection = CASE_ID + " = " + id;
+                    selection = CaseBookContentProviderContract.CASE_ID + " = " + id;
                 } else {
-                    selection = selection + " AND " + CASE_ID + " = " + id;
+                    selection = selection + " AND " + CaseBookContentProviderContract.CASE_ID + " = " + id;
                 }
                 break;
             default:
                 throw new IllegalArgumentException("Wrong URI: " + uri);
         }
         db = dbHelper.getWritableDatabase();
-        Cursor cursor = db.query(CASES_TABLE, projection, selection,
+        Cursor cursor = db.query(CaseBookContentProviderContract.CASES_TABLE, projection, selection,
                 selectionArgs, null, null, sortOrder);
         // просим ContentResolver уведомлять этот курсор
         // об изменениях данных в CASE_CONTENT_URI
         cursor.setNotificationUri(getContext().getContentResolver(),
-                CASE_CONTENT_URI);
+                CaseBookContentProviderContract. CASE_CONTENT_URI);
         return cursor;
     }
 
@@ -119,11 +87,44 @@ public class CaseBookContentProvider extends ContentProvider {
             throw new IllegalArgumentException("Wrong URI: " + uri);
 
         db = dbHelper.getWritableDatabase();
-        long rowID = db.insert(CASES_TABLE, null, values);
-        Uri resultUri = ContentUris.withAppendedId(CASE_CONTENT_URI, rowID);
+        long rowID = db.insert(CaseBookContentProviderContract.CASES_TABLE, null, values);
+        Uri resultUri = ContentUris.withAppendedId(CaseBookContentProviderContract.CASE_CONTENT_URI, rowID);
         // уведомляем ContentResolver, что данные по адресу resultUri изменились
         getContext().getContentResolver().notifyChange(resultUri, null);
         return resultUri;
+    }
+
+    public int bulkInsert(Uri uri, ContentValues[] values){
+        int numInserted = 0;
+        String table;
+
+        int uriType = uriMatcher.match(uri);
+
+        switch (uriType) {
+            case URI_CASE:
+                table = CaseBookContentProviderContract.CASES_TABLE;
+                break;
+            default:
+                return 0;
+        }
+        SQLiteDatabase sqlDB = dbHelper.getWritableDatabase();
+        sqlDB.beginTransaction();
+        try {
+            for (ContentValues cv : values) {
+                long newID = sqlDB.insertOrThrow(table, null, cv);
+                if (newID <= 0) {
+                    throw new SQLException("Failed to insert row into " + uri);
+                }
+            }
+            sqlDB.setTransactionSuccessful();
+            getContext().getContentResolver().notifyChange(uri, null);
+            numInserted = values.length;
+        } catch(Exception exception) {
+            numInserted = 0;
+        } finally {
+            sqlDB.endTransaction();
+        }
+        return numInserted;
     }
 
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -136,16 +137,16 @@ public class CaseBookContentProvider extends ContentProvider {
                 String id = uri.getLastPathSegment();
                 Log.d(TAG, "URI_CASE_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
-                    selection = CASE_ID + " = " + id;
+                    selection = CaseBookContentProviderContract.CASE_ID + " = " + id;
                 } else {
-                    selection = selection + " AND " + CASE_ID + " = " + id;
+                    selection = selection + " AND " + CaseBookContentProviderContract.CASE_ID + " = " + id;
                 }
                 break;
             default:
                 throw new IllegalArgumentException("Wrong URI: " + uri);
         }
         db = dbHelper.getWritableDatabase();
-        int cnt = db.delete(CASES_TABLE, selection, selectionArgs);
+        int cnt = db.delete(CaseBookContentProviderContract.CASES_TABLE, selection, selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return cnt;
     }
@@ -162,16 +163,16 @@ public class CaseBookContentProvider extends ContentProvider {
                 String id = uri.getLastPathSegment();
                 Log.d(TAG, "URI_CASE_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
-                    selection = CASE_ID + " = " + id;
+                    selection = CaseBookContentProviderContract.CASE_ID + " = " + id;
                 } else {
-                    selection = selection + " AND " + CASE_ID + " = " + id;
+                    selection = selection + " AND " + CaseBookContentProviderContract.CASE_ID + " = " + id;
                 }
                 break;
             default:
                 throw new IllegalArgumentException("Wrong URI: " + uri);
         }
         db = dbHelper.getWritableDatabase();
-        int cnt = db.update(CASES_TABLE, values, selection, selectionArgs);
+        int cnt = db.update(CaseBookContentProviderContract.CASES_TABLE, values, selection, selectionArgs);
         getContext().getContentResolver().notifyChange(uri, null);
         return cnt;
     }
@@ -180,9 +181,9 @@ public class CaseBookContentProvider extends ContentProvider {
         Log.d(TAG, "getType, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_CASE:
-                return CASE_CONTENT_TYPE;
+                return CaseBookContentProviderContract.CASE_CONTENT_TYPE;
             case URI_CASE_ID:
-                return CASE_CONTENT_ITEM_TYPE;
+                return CaseBookContentProviderContract.CASE_CONTENT_ITEM_TYPE;
         }
         return null;
     }
@@ -194,12 +195,12 @@ public class CaseBookContentProvider extends ContentProvider {
         }
 
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(DB_CREATE);
+            db.execSQL(CaseBookContentProviderContract.DB_CREATE);
             ContentValues cv = new ContentValues();
             for (int i = 1; i <= 3; i++) {
-                cv.put(CASE_TITLE, "title " + i);
-                cv.put(CASE_TYPE, "type " + i);
-                db.insert(CASES_TABLE, null, cv);
+                cv.put(CaseBookContentProviderContract.CASE_TITLE, "title " + i);
+                cv.put(CaseBookContentProviderContract.CASE_TYPE, "type " + i);
+                db.insert(CaseBookContentProviderContract.CASES_TABLE, null, cv);
             }
         }
 

@@ -67,7 +67,7 @@ public class CasesServiceApiImp implements  CasesServiceApi {
 
             @Override
             protected void onPostExecute(@NonNull List<Case> cases) {
-                casesLoadedCallback.onCasesLoaded(cases);
+                casesLoadedCallback.onCasesLoadedFromApi(cases);
             }
         }.execute(filter);
     }

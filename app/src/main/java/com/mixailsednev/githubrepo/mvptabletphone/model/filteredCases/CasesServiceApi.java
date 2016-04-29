@@ -11,7 +11,7 @@ import java.util.List;
 public interface CasesServiceApi {
 
     interface CasesLoadedCallback {
-        void onCasesLoaded(@NonNull List<Case> loadedCases);
+        void onCasesLoadedFromApi(@NonNull List<Case> loadedCases);
     }
 
     void loadCases(@Nullable Filter filter, CasesLoadedCallback casesLoadedCallback);

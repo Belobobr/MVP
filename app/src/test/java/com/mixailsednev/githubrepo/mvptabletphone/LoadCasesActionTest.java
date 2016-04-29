@@ -51,7 +51,7 @@ public class LoadCasesActionTest {
         verify(filteredCasesStore).setLoading(true);
 
         verify(casesServiceApi).loadCases(eq(FILTER), casesLoadedCallbackArgumentCaptor.capture());
-        casesLoadedCallbackArgumentCaptor.getValue().onCasesLoaded(LOADED_CASES);
+        casesLoadedCallbackArgumentCaptor.getValue().onCasesLoadedFromApi(LOADED_CASES);
 
         verify(filteredCasesStore).setFilteredCases(LOADED_CASES);
         verify(filteredCasesStore).setLoading(false);

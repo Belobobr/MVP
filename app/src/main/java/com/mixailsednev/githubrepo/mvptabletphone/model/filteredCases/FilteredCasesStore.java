@@ -10,6 +10,8 @@ import java.util.List;
 
 public class FilteredCasesStore extends BaseStore<FilteredCasesState> {
 
+    private static String TAG = FilteredCasesStore.class.getSimpleName();
+
     private static FilteredCasesStore instance = new FilteredCasesStore();
 
     public static FilteredCasesStore getInstance() {
@@ -29,5 +31,4 @@ public class FilteredCasesStore extends BaseStore<FilteredCasesState> {
         getState().setLoading(loading);
         notifyDataChanged();
     }
-
 }
