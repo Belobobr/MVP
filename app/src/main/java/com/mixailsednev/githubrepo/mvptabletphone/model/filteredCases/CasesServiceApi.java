@@ -8,12 +8,14 @@ import com.mixailsednev.githubrepo.mvptabletphone.model.filter.Filter;
 
 import java.util.List;
 
+import rx.Observable;
+
 public interface CasesServiceApi {
 
     interface CasesLoadedCallback {
         void onCasesLoadedFromApi(@NonNull List<Case> loadedCases);
     }
 
-    void loadCases(@Nullable Filter filter, CasesLoadedCallback casesLoadedCallback);
+    Observable<List<Case>> loadCases(@Nullable Filter filter);
 
 }

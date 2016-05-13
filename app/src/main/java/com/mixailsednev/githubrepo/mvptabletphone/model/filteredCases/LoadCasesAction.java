@@ -1,16 +1,14 @@
 package com.mixailsednev.githubrepo.mvptabletphone.model.filteredCases;
 
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mixailsednev.githubrepo.mvptabletphone.model.cases.Case;
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.FilteredCaseDao;
 import com.mixailsednev.githubrepo.mvptabletphone.model.filter.Filter;
 
-import java.util.List;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class LoadCasesAction implements CasesServiceApi.CasesLoadedCallback {
+public class LoadCasesAction {
 
     private FilteredCasesStore filteredCasesStore;
     private CasesServiceApi casesServiceApi;
@@ -20,52 +18,23 @@ public class LoadCasesAction implements CasesServiceApi.CasesLoadedCallback {
         this.casesServiceApi = casesServiceApi;
     }
 
-
     public void run(@Nullable final Filter filter) {
         filteredCasesStore.setLoading(true);
 
-        loadLocalCases(filter);
-    }
+        FilteredCaseDao.getCasesObservable(filter)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(localCases -> {
+                    filteredCasesStore.setFilteredCases(localCases);
+                    filteredCasesStore.setLoading(false);
 
-    private void loadLocalCases(@Nullable final Filter filter) {
-        new AsyncTask<Void, Integer, List<Case>>() {
-            @Override
-            protected List<Case> doInBackground(Void... params) {
-                try {
-                    Thread.sleep(4000);
-                } catch (InterruptedException exception) {
-
-                }
-                return FilteredCaseDao.getCases(filter);
-            }
-
-            @Override
-            protected void onPostExecute(List<Case> cases) {
-                onLocalCasesLoaded(cases, filter);
-            }
-        }.execute();
-    }
-
-    private void onLocalCasesLoaded(@NonNull List<Case> loadedCases, @Nullable Filter filter) {
-        final boolean online = false;
-
-        filteredCasesStore.setFilteredCases(loadedCases);
-        filteredCasesStore.setLoading(false);
-
-        if (online) {
-            casesServiceApi.loadCases(filter, LoadCasesAction.this);
-        }
-    }
-
-    @Override
-    public void onCasesLoadedFromApi(@NonNull List<Case> loadedCases) {
-        filteredCasesStore.setLoading(false);
-
-        new AsyncTask<Case, Integer, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Case... params) {
-               return FilteredCaseDao.saveCases(params);
-            }
-        }.execute(loadedCases.toArray(new Case[loadedCases.size()]));
+                    return casesServiceApi.loadCases(filter)
+                            .subscribeOn(Schedulers.newThread());
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(remoteCases -> {
+                    filteredCasesStore.setFilteredCases(remoteCases);
+                    FilteredCaseDao.saveCases(remoteCases);
+                });
     }
 }

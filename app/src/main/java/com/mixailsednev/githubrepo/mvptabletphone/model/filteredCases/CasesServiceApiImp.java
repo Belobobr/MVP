@@ -1,7 +1,5 @@
 package com.mixailsednev.githubrepo.mvptabletphone.model.filteredCases;
 
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mixailsednev.githubrepo.mvptabletphone.model.cases.Case;
@@ -14,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import rx.Observable;
+
 public class CasesServiceApiImp implements  CasesServiceApi {
 
     private static CasesServiceApiImp instance = new CasesServiceApiImp();
@@ -23,52 +23,41 @@ public class CasesServiceApiImp implements  CasesServiceApi {
     }
 
     @Override
-    public void loadCases(final @Nullable Filter filter, final @NonNull CasesLoadedCallback casesLoadedCallback) {
-        new AsyncTask<Filter, Integer, List<Case>>() {
-            @Override
-            protected List<Case> doInBackground(Filter... params) {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException exception) {
+    public Observable<List<Case>> loadCases(@Nullable Filter filter) {
+        return Observable.create(subscriber ->  {
+            Observable.just(loadCasesInternal(filter)).subscribe(subscriber);
+        });
+    }
 
-                }
+    private List<Case> loadCasesInternal(@Nullable Filter filter) {
+        List<Case> cases = new ArrayList<>(
+                Arrays.asList(
+                        new CaseBuilder()
+                                .setTitle("First")
+                                .setCaseType(CaseTypes.COMMON)
+                                .createCase(),
+                        new CaseBuilder()
+                                .setTitle("Second")
+                                .setCaseType(CaseTypes.COMMON)
+                                .setAssigned("Misha")
+                                .createCase(),
+                        new CaseBuilder()
+                                .setTitle("Third")
+                                .setCaseType(CaseTypes.COMMON)
+                                .setAssigned("Misha")
+                                .createCase(),
+                        new CaseBuilder()
+                                .setTitle("fourth")
+                                .setCaseType(CaseTypes.ARBITR)
+                                .createCase())
+        );
 
-                final Filter filter = params[0];
-                List<Case> cases = new ArrayList<>(
-                        Arrays.asList(
-                                new CaseBuilder()
-                                        .setTitle("First")
-                                        .setCaseType(CaseTypes.COMMON)
-                                        .createCase(),
-                                new CaseBuilder()
-                                        .setTitle("Second")
-                                        .setCaseType(CaseTypes.COMMON)
-                                        .setAssigned("Misha")
-                                        .createCase(),
-                                new CaseBuilder()
-                                        .setTitle("Third")
-                                        .setCaseType(CaseTypes.COMMON)
-                                        .setAssigned("Misha")
-                                        .createCase(),
-                                new CaseBuilder()
-                                        .setTitle("fourth")
-                                        .setCaseType(CaseTypes.ARBITR)
-                                        .createCase())
-                );
-
-                if (filter == null || filter.isEmpty()) {
-                    return cases;
-                } else {
-                    cases =  MsCollectionsUtils.filter(cases, new Case.CaseTypePredicate(filter.getCaseType()));
-                    cases =  MsCollectionsUtils.filter(cases, new Case.AssignedPredicate(filter.getAssigned()));
-                    return cases;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(@NonNull List<Case> cases) {
-                casesLoadedCallback.onCasesLoadedFromApi(cases);
-            }
-        }.execute(filter);
+        if (filter == null || filter.isEmpty()) {
+            return cases;
+        } else {
+            cases =  MsCollectionsUtils.filter(cases, new Case.CaseTypePredicate(filter.getCaseType()));
+            cases =  MsCollectionsUtils.filter(cases, new Case.AssignedPredicate(filter.getAssigned()));
+            return cases;
+        }
     }
 }

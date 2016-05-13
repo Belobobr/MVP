@@ -13,9 +13,17 @@ import com.mixailsednev.githubrepo.mvptabletphone.model.filter.Filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+
 public class FilteredCaseDao {
 
     private final static String TAG = FilteredCaseDao.class.getSimpleName();
+
+    public static Observable<List<Case>> getCasesObservable(@Nullable final Filter filter) {
+        return Observable.create(subscriber ->  {
+            Observable.just(getCases(filter)).subscribe(subscriber);
+        });
+    }
 
     @NonNull
     public static List<Case> getCases(@Nullable final Filter filter) {
@@ -50,8 +58,8 @@ public class FilteredCaseDao {
         return cases;
     }
 
-    public static boolean saveCases(Case[] cases) {
-        ArrayList<ContentValues> contentValues = new ArrayList<ContentValues>(cases.length);
+    public static boolean saveCases(@NonNull List<Case> cases) {
+        ArrayList<ContentValues> contentValues = new ArrayList<ContentValues>(cases.size());
 
         for (Case savedCase : cases) {
             ContentValues cv = new ContentValues();

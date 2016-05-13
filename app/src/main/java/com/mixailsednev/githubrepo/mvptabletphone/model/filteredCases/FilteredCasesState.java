@@ -8,13 +8,13 @@ import java.util.List;
 
 public class FilteredCasesState {
 
+    private List<Case> filteredCases = new ArrayList<>();
+    private boolean loading;
+
     public FilteredCasesState(List<Case> filteredCases, boolean loading) {
         this.filteredCases = filteredCases;
         this.loading = loading;
     }
-
-    private List<Case> filteredCases = new ArrayList<>();
-    private boolean loading;
 
     public void setFilteredCases(@NonNull List<Case> cases) {
         filteredCases = cases;
